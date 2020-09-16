@@ -1,0 +1,10 @@
+* Homework 1
+1. No, not using experience to make decisions.
+
+2. Yes, if it is classifying emails based on known spam emails or similar. No, if it is using some other method, e.g., a predefined list of spam emails.
+
+3. Yes, if it is used to classify new data
+
+4. Only if machine learning is used in the speech processing, as it doesn't seem like GATE is machine learning based.
+
+5. Yes, if it is learned from a body of courses.
