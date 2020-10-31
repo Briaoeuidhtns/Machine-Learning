@@ -9,8 +9,8 @@ import visualize
 
 
 @dataclass
-class LinearRegression(visualize.Learner):
-    """adapted from book section 9.2.1"""
+class LinearRegression(visualize.DataView):
+    """Least Squares regression adapted from book section 9.2.1"""
     x: Sequence[Number]
     y: Sequence[Number]
     weights: List[float] = field(init=False)
@@ -19,7 +19,6 @@ class LinearRegression(visualize.Learner):
         self.x = np.array(self.x)
         self.y = np.array(self.y)
 
-        # ones for intercept I think
         newx = np.array([np.ones(self.x.shape[0]), self.x])
         A = newx @ newx.T
         b = newx @ self.y
