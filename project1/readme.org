@@ -3,13 +3,7 @@
 #+subtitle: Machine Learning
 #+author: Brian Brunner
 
-#+setupfile: ~/.local/share/org-html-themes/setup/theme-readtheorg.setup
-
-#+latex_header: \usepackage[newfloat]{minted}
-#+latex_header: \usepackage{caption}
-#+latex_header: \newcommand{\rvect}[1]{\begin{bmatrix} #1 \end{bmatrix}}
-# 6 bc len('[htbp]'), and I don't know how to specify that entire thing
-#+latex_header: \renewenvironment{listing}[6]{\captionsetup{type=listing}}{}
+#+setupfile: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
 
 * Setup
 This document assumes that python is running from a venv. Poetry should be used to install the dependencies:
