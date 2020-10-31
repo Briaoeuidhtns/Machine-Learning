@@ -1,23 +1,65 @@
-#+title: Project 1
+# -*- org-confirm-babel-evaluate: nil; -*-
+#+title: Portfolio
 #+subtitle: Machine Learning
 #+author: Brian Brunner
-# #+options: toc:nil
 
-* Environment
-I installed all of the dependencies using poetry, but I don't think I used any odd versions so that probably isn't relevant. If there are issues, the versions of libraries I used are listed in the =pyproject.toml= file at the root.
+#+setupfile: ~/.local/share/org-html-themes/setup/theme-readtheorg.setup
 
-* Running tests
-I converted the project description to a doctest, so just running ~src/ml.py~ should test the entire module against your sample runs, with noted modifications. In particular, I changed the type of errors to an ndarray and only ran until errors were 0, as per point 2.
+#+latex_header: \usepackage[newfloat]{minted}
+#+latex_header: \usepackage{caption}
+#+latex_header: \newcommand{\rvect}[1]{\begin{bmatrix} #1 \end{bmatrix}}
+# 6 bc len('[htbp]'), and I don't know how to specify that entire thing
+#+latex_header: \renewenvironment{listing}[6]{\captionsetup{type=listing}}{}
 
-It will exit success if success, else the exit code is number of failures. If you run with the ~-v~ flag, it will print a detailed report of what was run. The =# items had no tests= just means they didn't have specific tests, but everything is being tested in the module level docstring.
+* Setup
+This document assumes that python is running from a venv. Poetry should be used to install the dependencies:
+#+begin_src bash :exports both :results pp
+  poetry install
+#+end_src
 
-It also outputs the graphs in the description to the plots folder for review.
+Assuming emacs and installation to .venv, activate it via
+#+begin_src emacs-lisp :session main :exports both
+  (pyvenv-activate ".venv")
+#+end_src
 
-* Using
-The docstring for the module shows example usage, but it is identical to the example use, so I assume you're familiar.
+The python session should be initialized with
+#+begin_src python :session main :exports both
+  import numpy as np
+  from portfolio.visualize import Plot
 
-* Data I tested against
-My tests are added to the bottom of the module docstring.
+  from sklearn.datasets import load_iris
+  iris = load_iris()
 
-* Features
-I added all the methods listed, everything should work as described in project description.
+  # for binary classifications, get data for only type 1 and 2
+  x = iris.data[iris.target > 0]
+  # label as -1 and 1
+  y = np.where(iris.target[iris.target > 0] == 1, -1, 1)
+#+end_src
+
+* TODO Perceptron
+
+* Linear Regression
+For single dimension data, linear regression is defined as $w = A^{-1}b$, where A is $xx^\mathsf{T}$, and b is $yx$. Since the matrix may not be invertible, we take the pseudo inverse. Since I added a column of ones to the A matrix, $w_0$ holds the y intercept, and since it is only a single dimension, $w_1$ holds the slope of the line. The linear regression code may be run on the iris dataset with the following:
+#+begin_src python :session main :exports both :results verbatim html
+  from portfolio.linear_regression import LinearRegression
+
+  x_sepal_width = x[:, 1]
+
+  regression_plot = Plot(x_sepal_width, y)
+  regression_plot.add_view(LinearRegression)
+  regression_plot.embed()
+
+#+end_src
+
+* Decision Stumps
+Decision stumps are a type of weak learner. They consist of a decision tree with only a single node. My implementation only accepts a binary split of classes labeled -1 and 1, although in theory a decision stump can split based on threshold into any number of classes.
+
+I couldn't figure out how to translate the pseudocode for the efficient $O(dm)$ implementation, so this is the naïve $O(dm^2)$ version. I also have a somewhat fuzzy understanding of the book's explanation, but this is equivalent as far as I can tell.
+
+Since the decision stump needs a threshold $\theta$ in order to classify everything on each side as a different class, we need to define a set of steps. Given that two points may be arbitrarily close, I used the $x$ values from the data to ensure that if there was a single optimal $\theta$ it would be selected.
+
+The other part of the decision stump is the dimension of the data against which it will classify. This implementation considers all given dimensions and selects the most suitable one.
+
+The last part is the error function. The error function I used is a count of the differences between the predicted class and the expected class.
+
+For each of the combinations of dimensions and possible thresholds, the decision stump checks the error function. The one with the lowest error is selected as the dimension to classify against and the $\theta$ to use as a threshold.

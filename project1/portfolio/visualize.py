@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from tempfile import NamedTemporaryFile
 from typing import Type
 
 import matplotlib.pyplot as plt
+import mpld3
 from matplotlib.axes import Axes
 
 
@@ -14,9 +16,17 @@ class Plot:
         self.__axes = self.fig.add_subplot()
         # self.__axes.plot(self.x, self.y, 'o', label=label)
 
-    def add_learner(self, L: Type[DataView]):
+    def add_view(self, L: Type[DataView]):
         L(self.x, self.y).plot(self.__axes)
         self.__axes.legend()
+
+    def save(self):
+        with NamedTemporaryFile(delete=False, suffix='.png', dir='../data') as f:
+            self.fig.savefig(f)
+            return f.name
+
+    def embed(self):
+        return mpld3.fig_to_html(self.fig)
 
 
 class DataView:
@@ -25,5 +35,3 @@ class DataView:
 
     def plot(self, axes: Axes):
         pass
-# x = iris.data[iris.target > 0]
-# y = np.where(iris.target[iris.target > 0] == 1, -1, 1)

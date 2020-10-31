@@ -6,7 +6,7 @@ from operator import itemgetter
 from typing import Sequence
 
 import numpy as np
-import visualize
+from . import visualize
 
 
 @dataclass
