@@ -5,7 +5,7 @@ from numbers import Number
 from typing import List, Sequence
 
 import numpy as np
-import visualize
+from . import visualize
 
 
 @dataclass
@@ -27,11 +27,4 @@ class LinearRegression(visualize.DataView):
     def plot(self, axes):
         intercept, slope = self.weights
         ypred = slope * self.x + intercept
-        axes.plot(self.x, ypred, label='Linear Regression')
-
-
-def _test():
-    import doctest
-    return doctest.testmod(optionflags=0
-                           | doctest.ELLIPSIS
-                           | doctest.NORMALIZE_WHITESPACE)
+        axes.plot(self.x, ypred, label=fr'$y = {slope}x + {intercept}$')
