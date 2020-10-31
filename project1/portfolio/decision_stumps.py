@@ -24,7 +24,7 @@ class DecisionStumps(visualize.DataView):
         # was a bit confused on the optimized pseudocode in the book,
         # but to the best of my knowledge this is what the book wanted
         # for the O(dm^2) method
-        self.error, self.x_j, self.theta = max(((np.sum(np.sign(theta-x_j) != self.y), x_j, theta)
+        self.error, self.x_j, self.theta = min(((np.sum(np.sign(x_j-theta) != self.y), x_j, theta)
                                                 for x_j in self.x.T
                                                 for theta in x_j), key=itemgetter(0))
 
