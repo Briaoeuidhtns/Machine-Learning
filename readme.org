@@ -2,21 +2,26 @@
 #+title: Portfolio
 #+subtitle: Machine Learning
 #+author: Brian Brunner
+#+description: Final project for CSC 448: Machine Learning
 
-#+setupfile: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
+#+options: html5-fancy:t
+#+html_doctype: html5
+#+setupfile: ./org-html-themes/org/theme-readtheorg-local.setup
+
+The inline blocks in this document are executed via org-babel to produce this site and output, and are representative of an interactive session. The source of the project and this document are available on my github [[https://github.com/Briaoeuidhtns/Machine-Learning][here]].
 
 * Setup
-This document assumes that python is running from a venv. Poetry should be used to install the dependencies:
+Install the project dependencies via Poetry
 #+begin_src bash :exports both :results pp
   poetry install
 #+end_src
 
-Assuming emacs and installation to .venv, activate it via
+Activate the venv. In emacs you can activate a venv located at =.venv= via
 #+begin_src emacs-lisp :session main :exports both
   (pyvenv-activate ".venv")
 #+end_src
 
-The python session should be initialized with
+Load and shape some data for demonstrations
 #+begin_src python :session main :exports both
   import numpy as np
   from portfolio.visualize import Plot
