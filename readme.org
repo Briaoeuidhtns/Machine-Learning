@@ -1,45 +1,205 @@
 # -*- org-confirm-babel-evaluate: nil; -*-
-#+title: Portfolio
-#+subtitle: Machine Learning
+* Config                                                           :noexport:
+** Meta
+#+title: Machine Learning
+#+subtitle: Portfolio
 #+author: Brian Brunner
 #+description: Final project for CSC 448: Machine Learning
 
-#+options: html5-fancy:t
+** Babel
+#+property: header-args :session main :exports both :results table drawer
+
+** HTML export
 #+html_doctype: html5
+#+options: html5-fancy:t
 #+setupfile: ./org-html-themes/org/theme-readtheorg-local.setup
 
-The inline blocks in this document are executed via org-babel to produce this site and output, and are representative of an interactive session. The source of the project and this document are available on my github [[https://github.com/Briaoeuidhtns/Machine-Learning][here]].
+*** Styles
+#+html_head_extra: <style>
+
+#+html_head_extra: table {
+#+html_head_extra:     overflow: auto;
+#+html_head_extra:     display: block;
+#+html_head_extra:     max-height: 10em;
+#+html_head_extra: }
+
+#+html_head_extra: .ansi {
+#+html_head_extra:     white-space: pre;
+#+html_head_extra: }
+
+#+html_head_extra: </style>
+
+*** Ansi output
+#+name: format-ansi
+#+begin_src bash :session none :var x="" :results verbatim html
+  # echo "$x" | ansi2html --inline
+  echo '<div class="codeblock ansi">'
+  echo "$x" | ansi2html --inline --light-background
+  echo "</div>"
+#+end_src
+
+* About
+This document is written in emacs and org-mode, for export to html.
+
+The inline code blocks in this document are executed sequentially in a single python session by org-babel. Usage here is meant to be representative of use during an interactive session.
+
+=portfolio.visualize.Plot.embed()= produces a representation of the plot for embedding in an html document. For normal use, use =save= or =show= instead.
+
+The source of this document and the project are available on GitHub [[https://github.com/Briaoeuidhtns/Machine-Learning][here]]. If you are viewing this on GitHub, an exported version with output and graphs is available [[https://briaoeuidhtns.github.io/Machine-Learning/readme.html][here]].
 
 * Setup
 Install the project dependencies via Poetry
-#+begin_src bash :exports both :results pp
-  poetry install
+#+begin_src bash :session none :results verbatim html :post format-ansi(x=*this*) :cache yes
+  poetry install --no-dev --no-interaction --ansi
 #+end_src
 
-Activate the venv. In emacs you can activate a venv located at =.venv= via
-#+begin_src emacs-lisp :session main :exports both
+Activate the venv. In emacs you can activate a venv located at =./.venv= via
+#+begin_src emacs-lisp :results silent
   (pyvenv-activate ".venv")
 #+end_src
 
-Load and shape some data for demonstrations
-#+begin_src python :session main :exports both
+Load iris dataset
+#+begin_src python :results verbatim
   import numpy as np
   from portfolio.visualize import Plot
 
   from sklearn.datasets import load_iris
   iris = load_iris()
 
-  # for binary classifications, get data for only type 1 and 2
+#+end_src
+
+Get data for only type 1 and 2 for binary classifiers, and label as -1 or 1
+#+begin_src python :results verbatim
   x = iris.data[iris.target > 0]
-  # label as -1 and 1
   y = np.where(iris.target[iris.target > 0] == 1, -1, 1)
 #+end_src
 
-* TODO Perceptron
+* Models
+** TODO Perceptron
+*** Example runs from project description
+This section contains code equivalent to that in the example run in the project documentation, to show that it meets the specifications.
 
-* Linear Regression
-For single dimension data, linear regression is defined as $w = A^{-1}b$, where A is $xx^\mathsf{T}$, and b is $yx$. Since the matrix may not be invertible, we take the pseudo inverse. Since I added a column of ones to the A matrix, $w_0$ holds the y intercept, and since it is only a single dimension, $w_1$ holds the slope of the line. The linear regression code may be run on the iris dataset with the following:
-#+begin_src python :session main :exports both :results verbatim html
+#+begin_src python :results verbatim
+  import pandas as pd
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+  from portfolio.perceptron import Perceptron, plot_decision_regions, IRIS_OPTIONS
+  from portfolio.visualize import Plot
+#+end_src
+
+Download and parse the dataset
+#+begin_src python :results verbatim
+    df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data', **IRIS_OPTIONS)
+#+end_src
+
+Extract the first 100 labels (which are the first two types) for the first class
+#+begin_src python :results table drawer
+    y = df.iloc[0:100, 4].values
+    y
+#+end_src
+
+Since we only selected the first two, the classes are either =Iris-setosa= or =Iris-versicolor=. Label =Iris-setosa= as 1 and everything else as 0.
+#+begin_src python
+  y = np.where(y == 'Iris-setosa', -1, 1)
+  y
+#+end_src
+
+The first and third features are seperable, so select only those for the values in y
+#+begin_src python
+  X = df.iloc[0:100, [0, 2]].values
+  X
+#+end_src
+
+Plotting the data, we can clearly see that these two features are seperable.
+#+begin_src python :results verbatim html
+  plt.figure()
+  plt.scatter(X[:50, 0], X[:50, 1], color='red', marker='o', label='setosa')
+  plt.scatter(X[50:100, 0], X[50:100, 1], color='blue', marker='x', label='versicolor')
+  plt.xlabel('petal length')
+  plt.ylabel('sepal length')
+  plt.legend(loc='upper left')
+  Plot.embed(plt)
+#+end_src
+
+Initialize the perceptron with a learning rate of =0.1= and a maximum of 1000 iterations.
+#+begin_src python :results verbatim
+  pn = Perceptron(0.1, 1000)
+#+end_src
+
+~fit~ runs the perceptron algorithm on the given data. The number of errors per iteration is stored in ~errors~. Since this only took 6 iterations to converge, it dropped out early instead of doing the entire 1000.
+#+begin_src python
+  pn.fit(X, y)
+  pn.errors
+#+end_src
+
+This data can be seen plotted below.
+#+begin_src python :results verbatim html
+  plt.figure()
+  plt.plot(range(1, len(pn.errors) + 1), pn.errors, marker='o')
+  plt.xlabel('Iteration')
+  plt.ylabel('# of misclassifications')
+  Plot.embed(plt)
+#+end_src
+
+#+begin_src python
+  pn.net_input(X)
+#+end_src
+
+Running it on the original data in order, we can see that it correctly classifies all of the samples.
+#+begin_src python
+  pn.predict(X)
+#+end_src
+
+#+begin_src python
+  pn.weight
+#+end_src
+
+Here is a visualization of the computed decision boundary
+#+begin_src python :results verbatim html
+  plot_decision_regions(X, y, pn)
+  Plot.embed(plt)
+#+end_src
+
+The other data I tested against:
+
+Really close data. 701 seems like a really big number, but they are close so
+I'm assuming it could be right.
+
+#+begin_src python
+  X1 = df.iloc[0:100, [0, 1]].values
+  pn.fit(X1, y)
+  pn.errors.shape
+#+end_src
+
+#+begin_src python :results verbatim html
+  plot_decision_regions(X1, y, pn)
+  Plot.embed(plt)
+#+end_src
+
+And data with a very wide separation. Here we can see it dropping out after only 3 iterations.
+#+begin_src python
+  X2 = df.iloc[0:100, [2, 3]].values
+  pn.fit(X2, y)
+  pn.errors
+#+end_src
+
+#+begin_src python :results verbatim html
+  plot_decision_regions(X2, y, pn)
+  Plot.embed(plt)
+#+end_src
+
+Close all the figures we opened:
+
+#+begin_src python :results silent
+  plt.close('all')
+#+end_src
+
+** Linear Regression
+For single dimension data, linear regression is defined as $w = A^{-1}b$, where A is $xx^\mathsf{T}$, and b is $yx$. Since the matrix may not be invertible, we take the pseudo inverse. Since I added a column of ones to the A matrix, $w_0$ holds the y intercept, and since it is only a single dimension, $w_1$ holds the slope of the line.
+
+The linear regression code may be run on the iris dataset with the following:
+#+begin_src python :results verbatim html
   from portfolio.linear_regression import LinearRegression
 
   x_sepal_width = x[:, 1]
@@ -47,10 +207,9 @@ For single dimension data, linear regression is defined as $w = A^{-1}b$, where 
   regression_plot = Plot(x_sepal_width, y)
   regression_plot.add_view(LinearRegression)
   regression_plot.embed()
-
 #+end_src
 
-* Decision Stumps
+** Decision Stumps
 Decision stumps are a type of weak learner. They consist of a decision tree with only a single node. My implementation only accepts a binary split of classes labeled -1 and 1, although in theory a decision stump can split based on threshold into any number of classes.
 
 I couldn't figure out how to translate the pseudocode for the efficient $O(dm)$ implementation, so this is the naïve $O(dm^2)$ version. I also have a somewhat fuzzy understanding of the book's explanation, but this is equivalent as far as I can tell.
@@ -62,3 +221,19 @@ The other part of the decision stump is the dimension of the data against which 
 The last part is the error function. The error function I used is a count of the differences between the predicted class and the expected class.
 
 For each of the combinations of dimensions and possible thresholds, the decision stump checks the error function. The one with the lowest error is selected as the dimension to classify against and the $\theta$ to use as a threshold.
+
+Shown here is the decision boundary, along with the values plotted for the chosen dimension, with the label on the y axis. As you can see, these are not seperable, but the optimal boundary was still found.
+#+begin_src python :results verbatim html
+  from portfolio.decision_stumps import DecisionStumps
+
+  x_sepal_width = x[:, 1]
+
+  regression_plot = Plot(x, y)
+  regression_plot.add_view(DecisionStumps)
+  regression_plot.embed()
+#+end_src
+
+** TODO Support Vector Machine
+*** Hard SVM
+** TODO K-Nearest Neighbor
+*** 1-NN
