@@ -20,8 +20,8 @@ class Plot:
         self.fig = plt.figure()
         self.__axes = self.fig.add_subplot()
 
-    def add_view(self, L: Type[DataView], **kwargs):
-        L(self.x, self.y, **kwargs).plot(self.__axes)
+    def add_view(self, L: Type[DataView], *args, **kwargs):
+        L(self.x, self.y, *args, **kwargs).plot(self.__axes)
         self.__axes.legend()
 
     def save(self, dir='../data'):
