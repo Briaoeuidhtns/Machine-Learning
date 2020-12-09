@@ -6,6 +6,7 @@ from tempfile import NamedTemporaryFile
 from typing import Sequence, Type
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 import mpld3
 import numpy as np
 from matplotlib.axes import Axes
@@ -31,7 +32,7 @@ class Plot:
             return f.name
 
     def show(self):
-        plt.show(self.fig)
+        self.fig.show()
 
     def embed(maybe_self, static=True):
         """Exports as a string suitable for html embedding
@@ -69,3 +70,27 @@ class DataView:
 class Points(DataView):
     def plot(self, axes: Axes):
         axes.plot(self.x, self.y, 'o', label=self.label)
+
+
+def plot_decision_regions(ax, X, y, classifier, resolution=0.02):
+    # setup marker generator and color map
+    markers = ('s', 'x', 'o', '^', 'v')
+
+    # plot the decision surface
+    x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    x2_min, x2_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, resolution),
+                           np.arange(x2_min, x2_max, resolution))
+    Z = classifier.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
+    Z = Z.reshape(xx1.shape)
+    ax.contourf(xx1, xx2, Z, alpha=0.4)
+
+    # plot class samples
+    for idx, cl in enumerate(np.unique(y)):
+        d = X[y == cl]
+        ax.scatter(x=d[:, 0],
+                   y=d[:, 1],
+                   alpha=0.8,
+                   c=np.full_like(d[:, 0], idx),
+                   marker=markers[idx],
+                   label=cl)

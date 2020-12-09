@@ -14,7 +14,7 @@ import visualize
 @dataclass
 class Soft(visualize.DataView):
     rate: Real = 0.001
-    lmbda: Real = 0.001
+    lmbda: Real = 0.002
     niter: int = 100
     w: Sequence[Real] = field(init=False, default=None)
     b: Real = field(init=False, default=None)
@@ -24,20 +24,26 @@ class Soft(visualize.DataView):
         self.w = np.random.rand(n_features)
         self._fit()
 
-    def _correct(self, x, y):
-        return y * (np.dot(x, self.w) - self.b) >= 1
+    def _hinge_loss(self, x, y):
+        return y * self._classifier_score(x)
+
+    def _classifier_score(self, x):
+        return x @ self.w - self.b
 
     def _fit(self):
         self.b = 0
 
         for _ in range(self.niter):
             for x_i, y_i in zip(self.x, self.y):
-                if _correct(x_i, y_i):
-                    self.w -= self.rate * (2 * self.lmbda * self.w)
+                if self._hinge_loss(x_i, y_i) >= 1:
+                    self.w -= self.rate * (self.lmbda * self.w)
                 else:
-                    self.w -= self.rate * (2 * self.lmbda * self.w -
+                    self.w -= self.rate * (self.lmbda * self.w -
                                            np.dot(x_i, y_i))
                     self.b -= self.rate * y_i
 
     def predict(self, X):
-        return np.sign(X @ self.w - self.b)
+        return np.sign(self._classifier_score(X))
+
+    def plot(self, ax):
+        plot_decision_regions(ax, self.x, self.y, svm)
