@@ -50,7 +50,7 @@ The source of this document and the project are available on GitHub [[https://gi
 * Setup
 Install the project dependencies via Poetry
 #+begin_src bash :session none :results verbatim html :post format-ansi(x=*this*) :cache yes
-  poetry install --no-dev --no-interaction --ansi
+  poetry install --no-interaction --ansi
 #+end_src
 
 Activate the venv. In emacs you can activate a venv located at =./.venv= via
@@ -89,12 +89,12 @@ This section contains code equivalent to that in the example run in the project 
 #+end_src
 
 Download and parse the dataset
-#+begin_src python :results verbatim
+#+begin_src python :results silent
     df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data', **IRIS_OPTIONS)
 #+end_src
 
-Extract the first 100 labels (which are the first two types) for the first class
-#+begin_src python :results table drawer
+Extract the first 100 labels (which are the first two types)
+#+begin_src python
     y = df.iloc[0:100, 4].values
     y
 #+end_src
@@ -123,7 +123,7 @@ Plotting the data, we can clearly see that these two features are seperable.
 #+end_src
 
 Initialize the perceptron with a learning rate of =0.1= and a maximum of 1000 iterations.
-#+begin_src python :results verbatim
+#+begin_src python :results silent
   pn = Perceptron(0.1, 1000)
 #+end_src
 
