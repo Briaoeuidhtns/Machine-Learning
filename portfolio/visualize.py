@@ -75,6 +75,8 @@ class Points(DataView):
 def plot_decision_regions(ax, X, y, classifier, resolution=0.02):
     # setup marker generator and color map
     markers = ('s', 'x', 'o', '^', 'v')
+    colors = ('red', 'blue', 'lightgreen', 'gray', 'cyan')
+    cmap = ListedColormap(colors[:len(np.unique(y))])
 
     # plot the decision surface
     x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1
@@ -83,14 +85,15 @@ def plot_decision_regions(ax, X, y, classifier, resolution=0.02):
                            np.arange(x2_min, x2_max, resolution))
     Z = classifier.predict(np.array([xx1.ravel(), xx2.ravel()]).T)
     Z = Z.reshape(xx1.shape)
-    ax.contourf(xx1, xx2, Z, alpha=0.4)
+    ax.contourf(xx1, xx2, Z, alpha=0.4, cmap=cmap)
+    ax.set_xlim(xx1.min(), xx1.max())
+    ax.set_ylim(xx2.min(), xx2.max())
 
     # plot class samples
     for idx, cl in enumerate(np.unique(y)):
-        d = X[y == cl]
-        ax.scatter(x=d[:, 0],
-                   y=d[:, 1],
+        ax.scatter(x=X[y == cl, 0],
+                   y=X[y == cl, 1],
                    alpha=0.8,
-                   c=np.full_like(d[:, 0], idx),
+                   color=cmap(idx),
                    marker=markers[idx],
                    label=cl)

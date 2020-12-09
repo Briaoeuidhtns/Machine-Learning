@@ -8,20 +8,18 @@ import matplotlib.pyplot as plt
 
 import numpy as np
 
-import visualize
+from . import visualize
 
 
 @dataclass
 class Soft(visualize.DataView):
     rate: Real = 0.001
     lmbda: Real = 0.002
-    niter: int = 100
+    niter: int = 1000
     w: Sequence[Real] = field(init=False, default=None)
     b: Real = field(init=False, default=None)
 
     def __post_init__(self, *args, **kwargs):
-        n_samples, n_features = self.x.shape
-        self.w = np.random.rand(n_features)
         self._fit()
 
     def _hinge_loss(self, x, y):
@@ -32,6 +30,8 @@ class Soft(visualize.DataView):
 
     def _fit(self):
         self.b = 0
+        n_samples, n_features = self.x.shape
+        self.w = np.random.rand(n_features)
 
         for _ in range(self.niter):
             for x_i, y_i in zip(self.x, self.y):
@@ -46,4 +46,4 @@ class Soft(visualize.DataView):
         return np.sign(self._classifier_score(X))
 
     def plot(self, ax):
-        plot_decision_regions(ax, self.x, self.y, svm)
+        visualize.plot_decision_regions(ax, self.x, self.y, self)
