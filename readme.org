@@ -233,26 +233,61 @@ Shown here is the decision boundary, along with the values plotted for the chose
   regression_plot.embed()
 #+end_src
 
-** TODO Support Vector Machine
+** Support Vector Machine
 *** Soft SVM
-** K-Nearest Neighbor
-#+begin_src python :colnames '("label" "petal length" "sepal length")
-  from portfolio.knn import KNN
+SVMs are a linear classification model . Unlike the perceptron, SVMs optimize for the widest margin between classes.
 
-  y = df.iloc[0:100, 4].values
-  y = np.where(y == 'Iris-setosa', -1, 1)
-  X = df.iloc[0:100, [0, 2]].values
+In addition, since this is a soft-margin svm, it uses a a hinge loss function. This allows it to accept non linearly serperable data, and produce a reasonable classification boundary.
+
+Optimization of this loss function is implemented via a stochastic gradient decent (SGD).
+
+For example, this data from iris is not seperable.
+#+begin_src python :colnames '("label" "sepal length" "petal width")
+  from portfolio import svm
+
+  y = df.iloc[50:, 4].values
+  y = np.where(y == 'Iris-versicolor', -1, 1)
+  X = df.iloc[50:, [0, 3]].values
   np.c_[y, X]
 #+end_src
 
-#+begin_src python :results verbatim
+Running the soft svd classifier on it, we get a reasonably accurate classification of the data.
+#+begin_src python :results verbatim html
+  plot = Plot(X, y)
+  plot.add_view(svm.Soft)
+  plot.embed()
+#+end_src
+
+** K-Nearest Neighbor
+K nearest neighbors classifier simply classifies a sample based upon the closest training data.
+
+At least in this implementation, although also in general to a lesser extent, KNN tends to be very computationally intensive for large datasets, since it must compute the distance to all points in order to find the best.
+#+begin_src python :colnames '("label" "sepal length" "petal width")
+  from portfolio.knn import KNN
+
+  y = df.iloc[50:, 4].values
+  y = np.where(y == 'Iris-versicolor', -1, 1)
+  X = df.iloc[50:, [0, 3]].values
+  np.c_[y, X]
+#+end_src
+
+#+begin_src python :results silent
   knn = KNN(X, y)
 #+end_src
 
 #+begin_src python
-  knn.predict(1).item()
+  knn.predict([[0, 0]]).item()
 #+end_src
 
 #+begin_src python
-  knn.predict(10).item()
+  knn.predict([[3, 8]]).item()
+#+end_src
+
+Given the same data as the SVM example, we can see that KNN is able to classify this data entirely as opposed to the lossy linear classifier. This isn't necessarily an argument, since it doesn't take into account the possibility of overfitting, which KNN is always affected by.
+
+Given certain datasets, including this one, the performance is very good.
+#+begin_src python :results verbatim html
+  fig = plt.figure()
+  visualize.plot_decision_regions(fig.add_subplot(), X, y, knn)
+  Plot.embed(fig)
 #+end_src
